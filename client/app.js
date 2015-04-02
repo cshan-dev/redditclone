@@ -1,6 +1,7 @@
 //we'll use routes for this one, our app is "upvoter"
 var app = angular
   .module("upvoter", ['ngRoute']);
+ 
 
 app .config([
   "$routeProvider", 
@@ -67,12 +68,34 @@ app.factory('posts', ["$http", function($http){
           });
     },
 
+    downvote : function(post){
+        return $http.put("/posts/" + post._id + "/downvote")
+           .success(function(data){
+             post.downvotes -= 1;
+          });
+    },
+    
+
+    downvoteComment : function(post,comment){
+      return $http.put("/posts/"+post._id + "/comments/"+comment._id + "/downvote")
+       .success(function(data){
+         comment.downvotes -= 1;
+         });
+     }, 
+
     upvoteComment : function(post, comment) {
       return $http.put("/posts/"+post._id + "/comments/"+comment._id + "/upvote")
         .success(function(data){
           comment.upvotes += 1;
         });
-    }
+    },
+
+   commentingComment : function(post, comment){
+      return $http.put("/posts/"+post._id + "/comments/"+comment._id + "/comments")
+      .success(function(data){
+         comment.comments +=1;
+        });
+} 
   };
 
   return object;
@@ -95,7 +118,7 @@ app.controller(
         if (!$scope.text || $scope.text === ''){ return; }
         //calling the factory method, notice that we are saving the "success" callback to here 
         //so we can inject the comments into scope
-        posts.addComment(post._id, {text: $scope.text, upvotes: 0})
+        posts.addComment(post._id, {text: $scope.text, upvotes: 0, downvotes:0 })
           .success(function(comment) {
             $scope.comments.push(comment);
         });
@@ -106,7 +129,20 @@ app.controller(
       $scope.increaseCommentUpvotes = function(comment){
         posts.upvoteComment(post, comment);
       }
-    }
+      $scope.decreaseCommentDownvotes = function(comment){
+        posts.downvoteComment(post,comment);
+      //  prompt("Enter Comment","");
+} 
+	$scope.increaseCommentComments = function(comment){
+        // comments.commentComment(comment);
+           prompt("Enter Comment","");
+        //  var post = comment.nodes.length +1;
+	 // var newcomment = newComment +'-'+post;
+	 
+        }
+      
+  
+ }
   ]
 );
 
@@ -119,13 +155,16 @@ app.controller(
 //very similar to above code.
       $scope.addPost = function(){
         if (!$scope.text || $scope.text === ''){ return; }
-        posts.createPost({text: $scope.text, upvotes: 0, comments: []});
+        posts.createPost({text: $scope.text, upvotes: 0, downvotes: 0, comments: []});
         $scope.text = '';
       }
 
-      $scope.increaseUpvotes = function(post){
+      $scope.increaseUpvotes = function(post){ 
         posts.upvote(post);
-      }
+      } 
+     $scope.decreaseDownvotes = function(post){
+       posts.downvote(post);
+}
     }
   ]
 );
