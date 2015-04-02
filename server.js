@@ -43,6 +43,8 @@ var CommentSchema = new mongoose.Schema({
   upvotes: {type: Number, default: 0},
   downvotes: {type: Number, default: 0},
   post: { type: mongoose.Schema.Types.ObjectId, ref: 'Post' }
+ // parents: {{type: mongoose.Schema.Types.ObjectId, ref: 'Comment'}
+ // comments: [{type: mongoose.Schema.Types.ObjectId, ref: 'Comment'}]
 });
 
 CommentSchema.methods.upvote = function(cb) {
@@ -162,6 +164,24 @@ router.post('/posts/:post/comments', function(req, res, next) {
     });
   });
 });
+//LOOK HERE LATER
+//router.post('/posts/:post/comments/:comment/comments', function (req,res,next){
+ // var comment = new Comment(req.body);
+ // comment.post = req.post;
+ // comment.parents = req.comment;
+
+ // comment.save(function(err, comment){
+  //  if(err){return next(err);}
+
+   // req.post.comments.push(comment);
+   // req.post.save(function(err,post){
+   // if(err){return next(err);}
+
+   // res.json(comment);
+
+   // });
+  // });
+//});
 
 router.put('/posts/:post/comments/:comment/upvote', function(req, res, next) {
   req.comment.upvote(function(err, comment){
