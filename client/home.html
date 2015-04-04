@@ -1,16 +1,27 @@
+
 <h1>
-  Quick MEAN-stack Upvoter
+  MEANit, Reddit Clone - By cshanfycz
 </h1>
 <hr>
-<input type="text" ng-model="text" class="new-post-text"></input>
-<button ng-click="addPost()" type="button" class="btn btn-std">Create new post</button>
-<hr>
-<ul>
-  <li ng-repeat="post in posts | orderBy : '-upvotes' "> 
-    <span class="upvotes">{{post.upvotes}}</span> {{post.text}} 
-    <span class="upvote" ng-click="increaseUpvotes(post)">^upvote this^</span> 
-    <span class="downvotes">{{post.downvotes}}</span> {{post.text}}
-    <span class="downvote" ng-click="decreaseDownvotes(post)">^downvote this^</span>
-    <a href="#topic/{{post._id}}">comments</a>
-  </li>
-</ul>
+<div ng-switch=" user || '_undefined_' ">
+  <div ng-switch-when="_undefined_">
+    <a href="/auth/github">Login</a>
+  </div>
+  <div ng-switch-default>
+    Hello, {{user.name}}
+    <a href="/logout">Logout</a>
+  </div>
+  <input type="text" ng-model="text" class="new-post-text"></input>
+  <button ng-click="addPost()" type="button" class="btn btn-std">Create new post</button>
+  <hr>
+  <ul data-ng-app="upvoter" data-ng-controller="homeController">
+    <li ng-repeat="post in posts | orderBy : '-upvotes' ">
+      <span class="upvotes">{{post.upvotes + post.downvotes }}</span>
+      <span class="upvote" ng-click="increaseUpvotes(post)">^upvote this^</span>
+      <span class="downvotes"></span>
+      <span class="downvote" ng-click="decreaseDownvotes(post)">\ downvote this/</span>
+      {{post.text}}
+      <a href="#topic/{{post._id}}">comments</a>
+    </li>
+  </ul>
+</div>
