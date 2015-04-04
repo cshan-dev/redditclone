@@ -158,8 +158,8 @@ app.config([
         posts.downvoteComment(post,comment);
 
       //  prompt("Enter Comment","");
-}
-	$scope.increaseCommentComments = function(comment){
+      }
+    	$scope.increaseCommentComments = function(comment){
         // comments.commentComment(comment);
            prompt("Enter Comment","");
         //  var post = comment.nodes.length +1;
@@ -168,7 +168,7 @@ app.config([
         }
 
 
- }
+ }]
 
 );
 
@@ -179,6 +179,7 @@ app.controller(
     function($scope, posts){
       $scope.text = "";
       $scope.posts = posts.posts;
+      $scope.user = posts.user.github;
 //very similar to above code.
       $scope.addPost = function(){
         if (!$scope.text || $scope.text === ''){ return; }
@@ -191,11 +192,7 @@ app.controller(
       }
      $scope.decreaseDownvotes = function(post){
        posts.downvote(post);
-}
+     }
     }
-    $scope.decreaseDownvotes = function(post){
-      posts.downvote(post);
-    }
-  }
 ]
 );

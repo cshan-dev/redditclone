@@ -9,26 +9,36 @@
 <!--
 <script type="text/ng-template"
 id="tree_item_renderer.html">
-    <span class="upvotes">{{comment.upvotes+comment.downvotes}}</span>
-    <span class ="upvote" ng-click="increaseCommentUpvotes(comment)">^Upvote this^</span>
-    <span class = "downvotes">
-    <span class = "downvote" ng-click"decreaseCommentDownvotes(comment)">\Downvote this/</span>
-    {{comment.text}}
-    <button ng-click="add(comment)"Add comment</button>
+<span class="upvotes">{{comment.upvotes+comment.downvotes}}</span>
+<span class ="upvote" ng-click="increaseCommentUpvotes(comment)">^Upvote this^</span>
+<span class = "downvotes">
+<span class = "downvote" ng-click"decreaseCommentDownvotes(comment)">\Downvote this/</span>
+{{comment.text}}
+<button ng-click="add(comment)"Add comment</button>
 
 <ul>
-	<li ng-repeat="comment in comment" ng-include="'tree_item_rendered.html'"></li>
+<li ng-repeat="comment in comment" ng-include="'tree_item_rendered.html'"></li>
 </ul>
 </script>
 
 <ul ng-app="Application" ng-controller="TreeController">
-	<li ng-repeat="comment in tree" ng-include="'tree_item_renderer.html'"></li>
-
--->
+<li ng-repeat="comment in tree" ng-include="'tree_item_renderer.html'"></li>
 </ul>
+-->
+
 
 <ul>
-  <li ng-repeat="comment in comments | orderBy : '-upvotes' "> <span class="upvotes">{{comment.upvotes+comment.downvotes }}</span> <span class="upvote" ng-click="increaseCommentUpvotes(comment)">^Upvote this^</span> <span class = "downvotes"></span><span class= "downvote" ng-click="decreaseCommentDownvotes(comment)">\Downvote this/</span><span class= "commentS">{{comment.comments}} </span><span class ="commenting" ng-click=IncreaseCommentComments(comment)">(Comment on Comment)</span>  {{comment.text}} </li>
+  <li ng-repeat="comment in comments | orderBy : '-upvotes' ">
+    <span class="upvotes">{{comment.upvotes+comment.downvotes }}</span>
+    <span class="upvote" ng-click="increaseCommentUpvotes(comment)">^Upvote this^</span>
+    <span class = "downvotes"></span>
+    <span class= "downvote" ng-click="decreaseCommentDownvotes(comment)">
+      \Downvote this/
+    </span>
+    <span class= "commentS">{{comment.comments}} </span>
+    <span class ="commenting" ng-click="IncreaseCommentComments(comment)">
+      (Comment on Comment)
+    </span>
+    {{comment.text}}
+  </li>
 </ul>
-
-
