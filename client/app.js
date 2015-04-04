@@ -20,7 +20,7 @@ app.config([
         }
       })
       .when('/topic/:id', {
-        templateUrl: "topics.html",
+        templateUrl: "topic.html",
         controller : "topicController",
         resolve : {
           post: ["$route", "posts", function($route, posts) {
