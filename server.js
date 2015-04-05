@@ -157,7 +157,7 @@ router.get('/posts/:post', function(req, res, next) {
 });
 
 
-router.put('/posts/:post/upvote', function(req, res, next) {
+router.put('/posts/:post/upvote', isLoggedIn, function(req, res, next) {
 	req.post.upvote(function(err, post){
 		if (err) { return next(err); }
 
@@ -165,7 +165,7 @@ router.put('/posts/:post/upvote', function(req, res, next) {
 	});
 });
 
-router.put('/posts/:post/downvote', function(req, res, next){
+router.put('/posts/:post/downvote', isLoggedIn, function(req, res, next){
 	req.post.downvote(function(err,post){
 		if(err) { return next(err);}
 
@@ -173,7 +173,7 @@ router.put('/posts/:post/downvote', function(req, res, next){
 	});
 });
 
-router.post('/posts/:post/comments', function(req, res, next) {
+router.post('/posts/:post/comments', isLoggedIn, function(req, res, next) {
 	var comment = new Comment(req.body);
 	comment.post = req.post;
 
@@ -210,7 +210,7 @@ router.post('/posts/:post/comments/:comment/comments', function (req,res,next){
 //});
 
 
-router.put('/posts/:post/comments/:comment/upvote', function(req, res, next) {
+router.put('/posts/:post/comments/:comment/upvote', isLoggedIn, function(req, res, next) {
 	req.comment.upvote(function(err, comment){
 		if (err) { return next(err); }
 
@@ -219,7 +219,7 @@ router.put('/posts/:post/comments/:comment/upvote', function(req, res, next) {
 	});
 });
 
-router.put('/posts/:post/comments/:comment/downvote', function(req, res, next){
+router.put('/posts/:post/comments/:comment/downvote', isLoggedIn, function(req, res, next){
 	req.comment.downvote(function( err, comment){
 		if (err) { return next(err); }
 

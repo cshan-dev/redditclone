@@ -174,6 +174,13 @@ app.controller(
   "homeController",
   ["$scope", "posts",
     function($scope, posts){
+
+      $scope.modalShown = false;
+      $scope.toggleModal = function() {
+        $scope.show = !$scope.show;
+      };
+
+
       $scope.text = "";
       $scope.posts = posts.posts;
       $scope.user = posts.user.github;
@@ -192,3 +199,20 @@ app.controller(
     }
   ]
 );
+//directive to be used on class="login-required"
+app.directive('loginRequired', function(){
+  return {
+    restrict: 'C',
+    templateUrl: "login-popup.html",
+    transclude: true,
+    link: function(scope, elem, attrs){
+      if (! scope.user) {
+      elem.on("click", function(){
+        console.log("scope.show before set" + scope.show);
+        scope.show = !scope.show;
+        console.log("Clicked loginRequired" + scope.show);
+      });
+    }
+    }
+  };
+})

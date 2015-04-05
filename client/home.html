@@ -18,9 +18,9 @@
     <li ng-repeat="post in posts | orderBy : '-upvotes' ">
       <div class="whole-post">
         <div class="voting">
-          <div class="upvote arrow" ng-click="increaseUpvotes(post)"></div>
+          <div class="upvote arrow login-required" ng-click="increaseUpvotes(post)"></div>
           <div class="score">{{post.upvotes + post.downvotes }}</div>
-          <div class="downvote arrow" ng-click="decreaseDownvotes(post)"></div>
+          <div class="downvote arrow login-required" ng-click="decreaseDownvotes(post)"></div>
         </div>
         <div class="post-text">
           {{post.text}}
