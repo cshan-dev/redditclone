@@ -166,16 +166,13 @@ app.config([
 	 // var newcomment = newComment +'-'+post;
 
         }
-
-
- }]
-
-);
+      }
+    ]
+  );
 
 app.controller(
   "homeController",
   ["$scope", "posts",
-
     function($scope, posts){
       $scope.text = "";
       $scope.posts = posts.posts;
@@ -186,13 +183,12 @@ app.controller(
         posts.createPost({text: $scope.text, upvotes: 0, downvotes: 0, comments: []});
         $scope.text = '';
       }
-
       $scope.increaseUpvotes = function(post){
         posts.upvote(post);
       }
-     $scope.decreaseDownvotes = function(post){
+      $scope.decreaseDownvotes = function(post){
        posts.downvote(post);
      }
     }
-]
+  ]
 );

@@ -1,0 +1,43 @@
+.voting{
+  float: left;
+}
+
+.arrow{
+  background-size: 30px 30px;
+  background-repeat: no-repeat;
+  height: 30px;
+  width: 30px;
+}
+
+.upvote {
+  background-image: url("andy_upvote.png");
+
+}
+
+.downvote{
+  background-image: url("eric_downvote.png");
+
+}
+
+.score{
+  margin-left: 5px;
+}
+
+.whole-post{
+  float: none;
+  height: 70px;
+  margin-bottom: 1em;
+}
+
+.post-text{
+  padding: 2em;
+}
+
+.clearleft{
+  clear: left;
+  height: 0px;
+}
+
+ul{
+  list-style-type: none;
+}

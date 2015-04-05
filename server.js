@@ -22,10 +22,6 @@ router.use(session({secret: 'keyboard cat'}));
 router.use(passport.initialize());
 router.use(passport.session());
 
-
-
-
-
 //Insecure by the way
 router.use( bodyParser.json() );
 router.use(bodyParser.urlencoded({ extended: true }));
