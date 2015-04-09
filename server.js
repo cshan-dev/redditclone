@@ -1,4 +1,3 @@
-
 var http =  require('http');
 var path = require('path');
 var express = require('express');
@@ -12,8 +11,7 @@ var passport = require('passport');
 var util = require('util');
 var methodOverride = require('method-override');
 var mongoose = require('mongoose');
-var bodyParser = require('body-parser')
-
+var bodyParser = require('body-parser');
 
 router.use(morgan('dev'));
 router.use(cookieParser());
@@ -60,7 +58,9 @@ var CommentSchema = new mongoose.Schema({
 	text: String,
 	upvotes: {type: Number, default: 0},
 	downvotes: {type: Number, default: 0},
-	post: { type: mongoose.Schema.Types.ObjectId, ref: 'Post' }
+	post: { type: mongoose.Schema.Types.ObjectId, ref: 'Post' },
+	comments: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Comment' }],
+	parentComment: { type: mongoose.Schema.Types.ObjectId, ref: 'Comment' }
 });
 
 CommentSchema.methods.upvote = function(cb) {
@@ -104,13 +104,10 @@ router.get("/posts", function(req, res, next){
 
 router.post('/posts', isLoggedIn, function(req, res, next) {
 	var post = new Post(req.body);
-
 	post.save(function(err, post){
 		if(err){ return next(err); }
-
 		res.json(post);
 	});
-
 });
 
 /*
@@ -128,7 +125,6 @@ router.param('post', function(req, res, next, id) {
 	query.exec(function (err, post){
 		if (err) { return next(err); }
 		if (!post) { return next(new Error('can\'t find post')); }
-
 		req.post = post;
 		return next();
 	});
@@ -137,11 +133,9 @@ router.param('post', function(req, res, next, id) {
 
 router.param('comment', function(req, res, next, id) {
 	var query = Comment.findById(id);
-
 	query.exec(function (err, comment){
 		if (err) { return next(err); }
 		if (!comment) { return next(new Error('can\'t find comment')); }
-
 		req.comment = comment;
 		return next();
 	});
@@ -151,7 +145,6 @@ router.get('/posts/:post', function(req, res, next) {
 	//this populate comes from mongoose, it loads up the comments associated with the post
 	req.post.populate('comments', function(err, post) {
 		if (err) { return next(err); }
-
 		res.json(post);
 	});
 });
@@ -160,7 +153,6 @@ router.get('/posts/:post', function(req, res, next) {
 router.put('/posts/:post/upvote', isLoggedIn, function(req, res, next) {
 	req.post.upvote(function(err, post){
 		if (err) { return next(err); }
-
 		res.json(post);
 	});
 });
@@ -168,22 +160,30 @@ router.put('/posts/:post/upvote', isLoggedIn, function(req, res, next) {
 router.put('/posts/:post/downvote', isLoggedIn, function(req, res, next){
 	req.post.downvote(function(err,post){
 		if(err) { return next(err);}
-
 		res.json(post);
 	});
 });
 
 router.post('/posts/:post/comments', isLoggedIn, function(req, res, next) {
 	var comment = new Comment(req.body);
+	console.log("req.body: " + req.body);
+	console.log("comment: " + comment);
 	comment.post = req.post;
-
 	comment.save(function(err, comment){
 		if(err){ return next(err); }
-
 		req.post.comments.push(comment);
+		//find parent
+		if (comment.parentComment){
+			console.log("LOOKING FOR PARENT");
+			Comment.findByIdAndUpdate(comment.parentComment,
+				{$push: {"comments" : comment}},
+				{safe: true, upsert: true},
+				function(err, parentComment){
+					console.log(err);
+			});
+		}
 		req.post.save(function(err, post) {
 			if(err){ return next(err); }
-
 			res.json(comment);
 		});
 	});
@@ -192,29 +192,23 @@ router.post('/posts/:post/comments', isLoggedIn, function(req, res, next) {
 
 //LOOK HERE LATER
 router.post('/posts/:post/comments/:comment/comments', function (req,res,next){
- // var comment = new Comment(req.body);
- // comment.post = req.post;
- // comment.parents = req.comment;
- // comment.comment = req.comment;
+ var newComment = new Comment(req.body);
+	newComment.post = req.post;
+	newComment.parent = req.comment;
  // comment.save(function(err, comment){
   //  if(err){return next(err);}
 
-  // req.comment.comments.push(comment);
+  req.comment.comments.push(newComment);
    req.comment.comments(function(err,comment){
    if(err){return next(err);}
-
-    res.json(comment);
-
+    res.json(newComment);
     });
    });
 //});
 
-
 router.put('/posts/:post/comments/:comment/upvote', isLoggedIn, function(req, res, next) {
 	req.comment.upvote(function(err, comment){
 		if (err) { return next(err); }
-
-
 		res.json(comment);
 	});
 });
@@ -222,25 +216,18 @@ router.put('/posts/:post/comments/:comment/upvote', isLoggedIn, function(req, re
 router.put('/posts/:post/comments/:comment/downvote', isLoggedIn, function(req, res, next){
 	req.comment.downvote(function( err, comment){
 		if (err) { return next(err); }
-
-
 		res.json(comment);
 	});
 });
 
-
 // ---- OUATH
-
-
 
 //var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
 //var GoogleStrategy = require( 'passport-google-oauth2' ).Strategy;
 var GitHubStrategy = require('passport-github').Strategy;
 
-
 var User = require("./user"); //user schema, mongoose setup
 var configAuth = require('./auth');
-
 
 // used to serialize the user for the session
 passport.serializeUser(function(user, done) {
@@ -300,15 +287,11 @@ router.get('/user/me', function(req, res){
 	res.json(req.user);
 })
 
-
 // route for logging out
 router.get('/logout', function(req, res) {
 	req.logout();
 	res.redirect('/');
 });
-
-
-
 
 router.get('/auth/github',
 passport.authenticate('github'),
@@ -317,30 +300,22 @@ function(req, res){
 	// function will not be called.
 });
 
-
 router.get('/auth/github/callback',
 passport.authenticate('github', { failureRedirect: '/login' }),
 function(req, res) {
 	res.redirect('/');
 });
 
-
 // route middleware to make sure a user is logged in
 function isLoggedIn(req, res, next) {
-
 	// if user is authenticated in the session, carry on
 	if (req.isAuthenticated())
 	return next();
-
 	// if they aren't redirect them to the home page
 	res.redirect('/');
 }
 
-
 //------END OAUTH
-
-
-
 
 //these ports are for my webfaction host, adjust accordingly
 server.listen(32154 || 3000, "0.0.0.0", function(){

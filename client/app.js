@@ -76,54 +76,44 @@ app.config([
           post.downvotes -= 1;
         });
       },
-
-
       downvoteComment : function(post,comment){
         return $http.put("/posts/"+post._id + "/comments/"+comment._id + "/downvote")
         .success(function(data){
           comment.downvotes -= 1;
         });
       },
-
       upvote : function(post){
         return $http.put("/posts/" + post._id + "/upvote")
         .success(function(data){
           post.upvotes += 1;
         });
       },
-
-    downvote : function(post){
+      downvote : function(post){
         return $http.put("/posts/" + post._id + "/downvote")
-           .success(function(data){
-             post.downvotes -= 1;
-          });
-    },
-
-
-    downvoteComment : function(post,comment){
-      return $http.put("/posts/"+post._id + "/comments/"+comment._id + "/downvote")
-       .success(function(data){
-         comment.downvotes -= 1;
-         });
-     },
-
-    upvoteComment : function(post, comment) {
-      return $http.put("/posts/"+post._id + "/comments/"+comment._id + "/upvote")
+        .success(function(data){
+          post.downvotes -= 1;
+        });
+      },
+      downvoteComment : function(post,comment){
+        return $http.put("/posts/"+post._id + "/comments/"+comment._id + "/downvote")
+        .success(function(data){
+          comment.downvotes -= 1;
+        });
+      },
+      upvoteComment : function(post, comment) {
+        return $http.put("/posts/"+post._id + "/comments/"+comment._id + "/upvote")
         .success(function(data){
           comment.upvotes += 1;
         });
-    },
-
-   commentingComment : function(post, comment){
-      return $http.put("/posts/"+post._id + "/comments/"+comment._id + "/comments")
-      .success(function(data){
-         comment.comments +=1;
+      },
+      commentingComment : function(post, comment){
+        return $http.put("/posts/"+post._id + "/comments/"+comment._id + "/comments", comment)
+        .success(function(data){
+          comment.comments +=1;
         });
-}
-  };
-
+      }
+    };
     return object;
-
   }]);
 
 
@@ -137,54 +127,68 @@ app.config([
       $scope.topic = post;
       $scope.comments = post.comments;
 
-      $scope.addComment = function(){
+      //TODO iterate over comments and create tree view
+      //make comment map for constant time finds
+      var commentMap = new Map();
+      for (comment in $scope.comments){
+        commentMap.set(comment.id, comment);
+      }
+      $scope.comments = makeCommentTree($scope.comments, commentMap);
+      console.log($scope.comments);
+
+      $scope.addComment = function(parentComment){
         //this prevents adding an empty comment
         if (!$scope.text || $scope.text === ''){ return; }
         //calling the factory method, notice that we are saving the "success" callback to here
         //so we can inject the comments into scope
-
-        posts.addComment(post._id, {text: $scope.text, upvotes: 0, downvotes:0 })
+        var newComment = {text: $scope.text,
+          upvotes: 0,
+          downvotes: 0};
+        if (parentComment != null) {
+          console.log("parentComment: " + JSON.stringify(parentComment));
+          newComment.parentComment = parentComment;
+          console.log("Adding child comment, parent: " + newComment.parent);
+        }
+          posts.addComment(post._id, newComment)
           .success(function(comment) {
             $scope.comments.push(comment);
-        });
-        //clear the input
-        $scope.text = '';
-      }
-      //something to call onclicks
-      $scope.increaseCommentUpvotes = function(comment){
-        posts.upvoteComment(post, comment);
-      }
-      $scope.decreaseCommentDownvotes = function(comment){
-        posts.downvoteComment(post,comment);
+          });
+          //clear the input
+          $scope.text = '';
+        }
+        //something to call onclicks
+        $scope.increaseCommentUpvotes = function(comment){
+          posts.upvoteComment(post, comment);
+        }
+        $scope.decreaseCommentDownvotes = function(comment){
+          posts.downvoteComment(post,comment);
 
-      //  prompt("Enter Comment","");
-      }
-    	$scope.increaseCommentComments = function(comment){
-        // comments.commentComment(comment);
-           prompt("Enter Comment","");
-        //  var post = comment.nodes.length +1;
-	 // var newcomment = newComment +'-'+post;
+          //  prompt("Enter Comment","");
+        }
+        $scope.increaseCommentComments = function(comment){
+          // comments.commentComment(comment);
+          prompt("Enter Comment","");
+          //  var post = comment.nodes.length +1;
+          // var newcomment = newComment +'-'+post;
 
         }
       }
     ]
   );
 
-app.controller(
-  "homeController",
-  ["$scope", "posts",
+  app.controller(
+    "homeController",
+    ["$scope", "posts",
     function($scope, posts){
 
       $scope.modalShown = false;
       $scope.toggleModal = function() {
         $scope.show = !$scope.show;
       };
-
-
       $scope.text = "";
       $scope.posts = posts.posts;
       $scope.user = posts.user.github;
-//very similar to above code.
+      //very similar to above code.
       $scope.addPost = function(){
         if (!$scope.text || $scope.text === ''){ return; }
         posts.createPost({text: $scope.text, upvotes: 0, downvotes: 0, comments: []});
@@ -194,8 +198,8 @@ app.controller(
         posts.upvote(post);
       }
       $scope.decreaseDownvotes = function(post){
-       posts.downvote(post);
-     }
+        posts.downvote(post);
+      }
     }
   ]
 );
@@ -207,12 +211,27 @@ app.directive('loginRequired', function(){
     transclude: true,
     link: function(scope, elem, attrs){
       if (! scope.user) {
-      elem.on("click", function(){
-        console.log("scope.show before set" + scope.show);
-        scope.show = !scope.show;
-        console.log("Clicked loginRequired" + scope.show);
-      });
-    }
+        elem.on("click", function(){
+          console.log("scope.show before set" + scope.show);
+          scope.show = !scope.show;
+          console.log("Clicked loginRequired" + scope.show);
+        });
+      }
     }
   };
 })
+
+function makeCommentTree(comments, commentMap){
+  for (var comment in comments){
+    // if (comment.comments){
+      console.log("Processing children " + comment);
+    //if a comment has children, inject them into its JSON and remove from list
+      for (var child in comment.comments){
+        child = commentMap.get(child);
+        console.log("child: " + child);
+        child.comments = makeCommentTree(child.comments);
+      }
+    // }
+  }
+  return comments;
+}

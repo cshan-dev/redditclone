@@ -1,0 +1,10 @@
+.upvote-arrow {
+  background-image: url("andy_upvote.png");
+  margin: 2px 0px 0px 0px;
+}
+
+.downvote-arrow{
+  background-image: url("eric_downvote.png");
+  margin: 2px 0px 0px 0px;
+
+}
