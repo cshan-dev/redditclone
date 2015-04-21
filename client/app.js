@@ -2,7 +2,6 @@
 var app = angular
 .module("upvoter", ['ngRoute']);
 
-
 app.config([
   "$routeProvider",
   function($routeProvider){
@@ -126,14 +125,15 @@ app.config([
 
       $scope.topic = post;
       $scope.comments = post.comments;
-
       //TODO iterate over comments and create tree view
       //make comment map for constant time finds
       var commentMap = new Map();
-      for (comment in $scope.comments){
-        commentMap.set(comment.id, comment);
+      for (comment of $scope.comments){
+        commentMap.set(comment._id, comment);
+        console.log("Comment in map: " + comment);
       }
-      $scope.comments = makeCommentTree($scope.comments, commentMap);
+      console.log("commentMap: " + JSON.stringify(commentMap));
+      $scope.comments = makeCommentTree2($scope.comments, commentMap, []);
       console.log($scope.comments);
 
       $scope.addComment = function(parentComment){
@@ -221,17 +221,45 @@ app.directive('loginRequired', function(){
   };
 })
 
-function makeCommentTree(comments, commentMap){
-  for (var comment in comments){
-    // if (comment.comments){
+function makeCommentTree(commentsList, commentMap){
+  for (var comment of commentsList){
+    if (comment.comments){
       console.log("Processing children " + comment);
     //if a comment has children, inject them into its JSON and remove from list
-      for (var child in comment.comments){
-        child = commentMap.get(child);
-        console.log("child: " + child);
-        child.comments = makeCommentTree(child.comments);
+      // for (var child of comment.comments){
+      //   console.log("child: " + child);
+      //   child = commentMap.get(child);
+      //   console.log("childmapped: " + child);
+      //   child.comments = makeCommentTree(child.comments);
+      // }
+      for (var i = 0; i < comment.comments.length; i++){
+        console.log("child: " + comment.comments[i]);
+        comment.comments[i] = commentMap.get(comment.comments[i]);
+        // commentsList.splice(i, 1)
+        console.log("childmapped: " + comment.comments[i]);
       }
-    // }
+    }
   }
-  return comments;
+  return commentsList;
+}
+
+function makeCommentTree2(commentsList, commentMap, commentTree){
+  for (var i = 0; i < commentsList.length; i++){
+    console.log("Processing comment " + i + ", " + commentsList[i]);
+    if (!commentsList[i].discovered){
+      commentTree.push(commentsList[i]);
+    }
+    if (commentsList[i].comments){
+      console.log("commentsList[" + i + "] has "
+                  + commentsList[i].comments.length + "children");
+      for (var j = 0; j < commentsList[i].comments.length; j++){
+        console.log("Looking at child: " + j + ", " + commentsList[i].comments[j]);
+        var child = commentMap.get(commentsList[i].comments[j]);
+        child.discovered = true;
+        commentsList[i].comments[j] = child;
+        commentTree = makeCommentTree2(child.comments, commentMap, commentTree);
+      }
+    }
+  }
+  return commentTree;
 }

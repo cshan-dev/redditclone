@@ -1,3 +1,21 @@
+<script type = "text/ng-template" id="commentTree">
+      <span class="upvotes">{{comment.upvotes+comment.downvotes }}</span>
+      <span class="upvote" ng-click="increaseCommentUpvotes(comment)">^Upvote this^</span>
+      <span class = "downvotes"></span>
+      <span class= "downvote" ng-click="decreaseCommentDownvotes(comment)">
+        \Downvote this/
+      </span>
+      <!-- <span class= "commentS">{{comment.comments}} </span> -->
+      <span ng-click="addComment(comment)" type="button" class="btn btn-std">
+        (Comment on Comment)
+      </span>
+      {{comment.text}}  {{comment._id}}
+      <ul ng-if="comment.comments">
+        <li ng-repeat="comment in comment.comments" ng-include="'commentTree'">
+        </li>
+      </ul>
+</script>
+
 <h1 class="topic">
   {{topic.text}}
 </h1>
@@ -8,8 +26,8 @@
 <hr>
 
 <ul>
-  <li ng-repeat="comment in comments | orderBy : '-upvotes' ">
-    <span class="upvotes">{{comment.upvotes+comment.downvotes }}</span>
+  <li ng-repeat="comment in comments | orderBy : '-upvotes' " ng-include="'commentTree'">
+    <!-- <span class="upvotes">{{comment.upvotes+comment.downvotes }}</span>
     <span class="upvote" ng-click="increaseCommentUpvotes(comment)">^Upvote this^</span>
     <span class = "downvotes"></span>
     <span class= "downvote" ng-click="decreaseCommentDownvotes(comment)">
@@ -19,6 +37,6 @@
     <span ng-click="addComment(comment)" type="button" class="btn btn-std">
       (Comment on Comment)
     </span>
-    {{comment.text}}
+    {{comment.text}} -->
   </li>
 </ul>
